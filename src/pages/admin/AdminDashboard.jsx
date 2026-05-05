@@ -36,6 +36,8 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [priorityFilter, setPriorityFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const perPage = 10
 
   useEffect(() => {
     Promise.all([
@@ -55,20 +57,21 @@ export default function AdminDashboard() {
     if (priorityFilter !== 'All') result = result.filter(t => t.priority === priorityFilter)
     if (search) result = result.filter(t => t.title.toLowerCase().includes(search.toLowerCase()))
     setFiltered(result)
+    setPage(1)
   }, [statusFilter, priorityFilter, search, tickets])
 
+  const totalPages = Math.ceil(filtered.length / perPage) || 1
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage)
   const getCount = (arr, key) => arr?.find(i => i._id === key)?.count || 0
 
   return (
     <Layout>
       <div className="p-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-slate-800">Admin Dashboard</h1>
           <p className="text-slate-500 text-sm mt-1">Overview of all support tickets</p>
         </div>
 
-        {/* Stats */}
         {stats && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <StatCard label="Total Tickets" value={stats.totalTickets} />
@@ -78,10 +81,8 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Breakdown */}
         {stats && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-            {/* By Status */}
             <div className="bg-white rounded-xl border border-slate-200 p-5">
               <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">By Status</h3>
               <div className="space-y-2">
@@ -93,7 +94,6 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-            {/* By Priority */}
             <div className="bg-white rounded-xl border border-slate-200 p-5">
               <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">By Priority</h3>
               <div className="space-y-2">
@@ -105,7 +105,6 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-            {/* By Category */}
             <div className="bg-white rounded-xl border border-slate-200 p-5">
               <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">By Category</h3>
               <div className="space-y-2">
@@ -120,7 +119,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Filters + Search */}
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <Input
             placeholder="Search tickets..."
@@ -147,35 +145,55 @@ export default function AdminDashboard() {
           <p className="text-sm text-slate-400 ml-auto">{filtered.length} of {tickets.length} tickets</p>
         </div>
 
-        {/* Ticket list */}
         {loading ? (
           <div className="space-y-3">
             {[1,2,3].map(i => <div key={i} className="h-20 bg-white rounded-xl animate-pulse" />)}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : paginated.length === 0 ? (
           <div className="bg-white rounded-xl border border-slate-200 py-16 text-center">
             <p className="text-slate-400">No tickets match the filters.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            {filtered.map((ticket, i) => (
-              <Link to={`/admin/tickets/${ticket._id}`} key={ticket._id}>
-                <div className={`flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors ${i !== 0 ? 'border-t border-slate-100' : ''}`}>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-800 truncate">{ticket.title}</p>
-                    <p className="text-sm text-slate-400 mt-0.5">
-                      {ticket.category} · {new Date(ticket.createdAt).toLocaleDateString()}
-                      {ticket.comments.length > 0 && ` · ${ticket.comments.length} comment${ticket.comments.length > 1 ? 's' : ''}`}
-                    </p>
+          <>
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              {paginated.map((ticket, i) => (
+                <Link to={`/admin/tickets/${ticket._id}`} key={ticket._id}>
+                  <div className={`flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors ${i !== 0 ? 'border-t border-slate-100' : ''}`}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-800 truncate">{ticket.title}</p>
+                      <p className="text-sm text-slate-400 mt-0.5">
+                        {ticket.category} · {new Date(ticket.createdAt).toLocaleDateString()}
+                        {ticket.comments.length > 0 && ` · ${ticket.comments.length} comment${ticket.comments.length > 1 ? 's' : ''}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${priorityStyles[ticket.priority]}`}>{ticket.priority}</span>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[ticket.status]}`}>{ticket.status}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${priorityStyles[ticket.priority]}`}>{ticket.priority}</span>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[ticket.status]}`}>{ticket.status}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex items-center justify-between mt-4 px-1">
+              <button
+                onClick={() => setPage(p => p - 1)}
+                disabled={page === 1}
+                className="text-sm text-slate-500 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                ← Previous
+              </button>
+              <span className="text-sm text-slate-400">Page {page} of {totalPages}</span>
+              <button
+                onClick={() => setPage(p => p + 1)}
+                disabled={page >= totalPages}
+                className="text-sm text-slate-500 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                Next →
+              </button>
+            </div>
+          </>
         )}
       </div>
     </Layout>
