@@ -7,8 +7,8 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-export default function Login() {
-  const [form, setForm] = useState({ email: '', password: '' })
+export default function Register() {
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'employee' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -23,11 +23,11 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const { data } = await api.post('/auth/login', form)
+      const { data } = await api.post('/auth/register', form)
       login(data.user, data.token)
-      navigate(data.user.role === 'admin' ? '/admin' : '/dashboard')
+      navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed')
+      setError(err.response?.data?.message || 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -38,7 +38,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">🎫 Helpdesk</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,6 +47,17 @@ export default function Login() {
                 {error}
               </div>
             )}
+            <div className="space-y-1">
+              <Label htmlFor="name">Full name</Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="Jane Smith"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -72,13 +83,13 @@ export default function Login() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
           <p className="text-center text-sm text-slate-500 mt-4">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-slate-800 font-medium hover:underline">
-              Register
+            Already have an account?{' '}
+            <Link to="/login" className="text-slate-800 font-medium hover:underline">
+              Sign in
             </Link>
           </p>
         </CardContent>
