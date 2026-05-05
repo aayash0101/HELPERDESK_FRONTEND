@@ -5,7 +5,6 @@ import api from '../../api/axios'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -14,9 +13,7 @@ export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,55 +31,54 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">🎫 Helpdesk</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen bg-slate-950 flex">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">H</span>
+          </div>
+          <span className="text-white font-semibold text-lg">Helpdesk</span>
+        </div>
+        <div>
+          <blockquote className="text-slate-300 text-xl font-light leading-relaxed">
+            "A well-managed support system is the backbone of any productive organization."
+          </blockquote>
+          <p className="text-slate-500 mt-4 text-sm">Internal Support Platform</p>
+        </div>
+        <div className="flex gap-6 text-slate-500 text-sm">
+          <span>Fast</span><span>Reliable</span><span>Secure</span>
+        </div>
+      </div>
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-white mb-2">Welcome back</h1>
+            <p className="text-slate-400">Sign in to your account to continue</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm px-3 py-2 rounded-md border border-red-200">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@company.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
+            <div className="space-y-2">
+              <Label className="text-slate-300 text-sm">Email address</Label>
+              <Input name="email" type="email" placeholder="you@company.com" value={form.email} onChange={handleChange} required className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 h-11" />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                required
-              />
+            <div className="space-y-2">
+              <Label className="text-slate-300 text-sm">Password</Label>
+              <Input name="password" type="password" placeholder="••••••••" value={form.password} onChange={handleChange} required className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 h-11" />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-medium">
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <p className="text-center text-sm text-slate-500 mt-4">
+          <p className="text-center text-slate-500 text-sm mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-slate-800 font-medium hover:underline">
-              Register
-            </Link>
+            <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">Create one</Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
